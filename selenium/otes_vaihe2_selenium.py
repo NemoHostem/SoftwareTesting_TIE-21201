@@ -43,6 +43,25 @@ def viewFullGuard():
         logging.error(e)
 
 
+def clickElementById(el):
+    try:
+        elem = browser.find_element_by_id(el)
+        elem.click()
+    except (NoSuchElementException, ElementNotInteractableException) as e:
+        logging.error(e)
+        
+        
+def fillTags(id_,tags):
+    try:
+        elem = browser.find_element_by_id(id_)
+        if len(tags) > 0:
+            for tag in tags:
+                elem.send_keys(tag+',')
+            elem.send_keys(Keys.BACKSPACE)
+    except (NoSuchElementException, ElementNotInteractableException) as e:
+        logging.error(e)
+
+
 def login():
     elem = browser.find_element_by_id('input-username')
     elem.send_keys(USERNAME)
@@ -58,25 +77,39 @@ def login():
     sleep(W)
     
 
+def previousPhotos():
+    viewListGuard()
+    clickElementById('view-previous')
+    sleep(W)
+    
+    
+def nextPhotos():
+    viewListGuard()
+    clickElementById('view-next')
+    sleep(W)
+    
+    
+def previousPhoto():
+    viewFullGuard()
+    clickElementById('view-full-previous')
+    sleep(W)
+    
+    
+def nextPhoto():
+    viewFullGuard()
+    clickElementById('view-full-next')
+    sleep(W)
+
+
 def openPhoto(i): 
     viewListGuard()
-    try:
-        elem = browser.find_element_by_id(i)
-        elem.click()
-    except (NoSuchElementException, ElementNotInteractableException) as e:
-        logging.error(e)
-        
+    clickElementById(i)
     sleep(W)
    
     
 def closePhoto():
     viewFullGuard()
-    try:
-        elem = browser.find_element_by_id('view-full-close')
-        elem.click()
-    except (NoSuchElementException, ElementNotInteractableException) as e:
-        logging.error(e)
-    
+    clickElementById('view-full-close')
     sleep(W)
         
 
@@ -85,6 +118,7 @@ def clearTags():
     try:
         elem = browser.find_element_by_id('view-full-keywords')
         elem.clear()
+        clickElementById('view-full-save-keywords')
     except (NoSuchElementException, ElementNotInteractableException) as e:
         logging.error(e)
     sleep(W)
@@ -93,13 +127,9 @@ def clearTags():
 def insertTags(tags):
     viewFullGuard()
     try:
-        elem = browser.find_element_by_id('view-full-keywords')
-        if len(tags) > 0:
-            for tag in tags:
-                elem.send_keys(tag+',')
-            elem.send_keys(Keys.BACKSPACE)
-        elem = browser.find_element_by_id('view-full-save-keywords')
-        elem.click()
+        fillTags('view-full-keywords',tags)
+        sleep(W)
+        clickElementById('view-full-save-keywords')
     except (NoSuchElementException, ElementNotInteractableException) as e:
         logging.error(e)
     sleep(W)
@@ -109,15 +139,30 @@ def replaceTags(tags):
     viewFullGuard()
     clearTags()
     insertTags(tags)
+    
+    
+def searchTags(tags):
+    viewListGuard()
+    try:
+        fillTags('view-searchbar-keywords',tags)
+        sleep(W)
+        clickElementById('view-search')
+    except (NoSuchElementException, ElementNotInteractableException) as e:
+        logging.error(e)
     sleep(W)
         
    
 login()
+searchTags('asd')
 openPhoto(1)
 replaceTags(['a','b','c'])
 closePhoto()
 openPhoto(2)
-
+closePhoto()
+nextPhotos()
+openPhoto(1)
+nextPhoto()
+previousPhoto()
 
 
 
