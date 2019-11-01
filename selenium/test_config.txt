@@ -1,0 +1,5 @@
+MY_USER_NAME = 'jonis'
+WEB_URL = 'http://localhost:8080/ps/v1/index.html'
+USERNAME = 'user'
+PASSWORD = 'password'
+W = 1
