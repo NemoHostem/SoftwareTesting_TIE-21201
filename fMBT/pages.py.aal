@@ -1,0 +1,243 @@
+language "python" {
+#coding: utf-8
+from time import sleep
+
+OPNRO = ":246248" # Muuta tama omaksesi
+POLKU = "http:/localhost:8080/ps/v1/index.html" #Muuta tama omaksesi
+DELAY = 3 #Viive sekunteina, tata saattaa joutua saatamaan
+USERNAME = "user"
+PASSWORD = "password"
+
+}
+# preview-show-vars:
+# preview-hide-vars:
+# preview-depth: 5
+variables {
+    nykyinen_sivu, nykyinen_kuva, nakyma #esitellaan muuttujat, joihin talletetaan mallin tila
+}
+initial_state {
+    nykyinen_sivu = 0 # sivusto avataan ykkössivulle, alustetaan mallin tila alkutilaan
+    nykyinen_kuva = 0
+    nakyma = "login"
+
+}
+adapter_init{
+# Taalla taas alustetaan testikohde
+# Naytön hallinta, avataan Xephyr ja sivusto
+# luodaan naytön hallintalaite ylatasolle tapahtumien nakyviin
+import fmbtx11
+import os
+global s
+os.system("Xephyr -screen 940/188x700/140 {} &".format(OPNRO))
+sleep(1)
+os.system("env DISPLAY={} firefox -width 940 -height 700 {} &".format(OPNRO,POLKU))
+sleep(3)
+
+s = fmbtx11.Screen(OPNRO)
+s.setBitmapPath("kuvat")
+
+#s.setScreenshotArchiveMethod("remove")
+#s.setScreenshotLimit(0)
+
+s.refreshScreenshot()
+}
+
+#esimerkki-input, kuvaa siirtymaa tilasta toiseen
+#guardissa on ehto, jolloin tama kyseinen input/tilasiirtyma voidaan suorittaa
+#bodyssa muokataan mallin tilaa. Ei koskaan kasittella testikohteen tilaa bodyssa
+#adapteri taas vastaa testikohteen kasittelysta. Tassa esimerkissa adapterissa
+#päivitetan verrattava screenshot, yritetaan painaa pages2.png-kuvan mukaista kohtaa
+#näytölta ja sen jalkeen jaadaan odottamaan
+input "kirjaudu" {
+    guard() {return nakyma == "login"}
+    body() {
+            nykyinen_sivu = 1
+            nakyma = "kansio"
+           }
+    adapter(){
+        s.refreshScreenshot()
+        sleep(DELAY*DELAY)
+        s.tapBitmap("input-username.png", colorMatch=0.7)
+        s.type(USERNAME)
+
+        s.tapBitmap("input-password.png", colorMatch=0.7)
+        s.type(PASSWORD)
+
+        s.tapBitmap("login.png", colorMatch=0.7)
+        sleep(DELAY)
+
+    }
+}
+input "siirry_seur_sivulle" {
+    guard() {return (nykyinen_sivu != 6 and nakyma == "kansio") or (nykyinen_kuva != 9 and nakyma == "kuva")}
+    body() {
+            if (nakyma == "kansio"):
+                nykyinen_sivu = nykyinen_sivu + 1
+            else:
+                nykyinen_kuva = nykyinen_kuva + 1
+           }
+    adapter(){
+        s.refreshScreenshot()
+        s.tapBitmap("seur.png", colorMatch=0.7)
+        sleep(DELAY)
+
+    }
+}
+input "siirry_ed_sivulle" {
+    guard() {return (nykyinen_sivu != 1 and nakyma == "kansio") or (nykyinen_kuva != 1 and nakyma == "kuva")}
+    body() {
+            if (nakyma == "kansio"):
+                nykyinen_sivu = nykyinen_sivu - 1
+            else:
+                nykyinen_kuva = nykyinen_kuva - 1
+           }
+    adapter(){
+        s.refreshScreenshot()
+        s.tapBitmap("ed.png", colorMatch=0.7)
+        sleep(DELAY)
+
+    }
+}
+input "siirry_kansionakymaan" {
+    guard() {return nakyma == "kuva"}
+    body() {nakyma = "kansio"}
+    adapter(){
+        s.refreshScreenshot()
+        s.tapBitmap("ruksi.png", colorMatch=0.9)
+        sleep(DELAY)
+
+    }
+}
+input "siirry_kuvanakymaan_s1" {
+    guard() {return (nykyinen_sivu == 1 and nakyma == "kansio")}
+    body() {
+            nakyma = "kuva"
+            nykyinen_kuva = 5
+           }
+    adapter(){
+        s.refreshScreenshot()
+        s.tapBitmap("kuvas1.png", colorMatch=0.9)
+        sleep(DELAY)
+    }
+}
+input "siirry_kuvanakymaan_s2" {
+    guard() {return (nykyinen_sivu == 2 and nakyma == "kansio")}
+    body() {
+            nakyma = "kuva"
+            nykyinen_kuva = 4
+           }
+    adapter(){
+        s.refreshScreenshot()
+        s.tapBitmap("kuvas2.png", colorMatch=0.9)
+        sleep(DELAY)
+    }
+}
+input "siirry_kuvanakymaan_s3" {
+    guard() {return (nykyinen_sivu == 3 and nakyma == "kansio")}
+    body() {
+            nakyma = "kuva"
+            nykyinen_kuva = 3
+           }
+    adapter(){
+        s.refreshScreenshot()
+        s.tapBitmap("kuvas3.png", colorMatch=0.9)
+        sleep(DELAY)
+    }
+}
+input "siirry_kuvanakymaan_s4" {
+    guard() {return (nykyinen_sivu == 4 and nakyma == "kansio")}
+    body() {
+            nakyma = "kuva"
+            nykyinen_kuva = 8
+           }
+    adapter(){
+        s.refreshScreenshot()
+        s.tapBitmap("kuvas4.png", colorMatch=0.9)
+        sleep(DELAY)
+    }
+}
+input "siirry_kuvanakymaan_s5" {
+    guard() {return (nykyinen_sivu == 5 and nakyma == "kansio")}
+    body() {
+            nakyma = "kuva"
+            nykyinen_kuva = 6
+           }
+    adapter(){
+        s.refreshScreenshot()
+        s.tapBitmap("kuvas5.png", colorMatch=0.9)
+        sleep(DELAY)
+    }
+}
+input "siirry_kuvanakymaan_s6" {
+    guard() {return (nykyinen_sivu == 6 and nakyma == "kansio")}
+    body() {
+            nakyma = "kuva"
+            nykyinen_kuva = 4
+           }
+    adapter(){
+        s.refreshScreenshot()
+        s.tapBitmap("kuvas6.png", colorMatch=0.9)
+        sleep(DELAY)
+    }
+}
+
+
+#Kuvaa tilaa jossa ollaan sivulla yksi
+#guard sisaltaa ehdon, jonka perusteella tunnistetaan, ollaanko kyseisessa tilassa vai ei
+#adapter-lohkossa voidaan tarkistaa vastaako testikohteen tila sita, mika on mallin tila
+#tassa tapauksessa siis esim tarkastamme, etta olemme oikeasti sivulla yksi
+tag "sivulla_1_k" {
+    guard() { return (nykyinen_sivu == 1 and nakyma == "kansio")} # Mallin mukaan kun nykyinen_sivu on 1, meidan pitaisi olla sivulla yksi myös testikohteessa
+    adapter() {
+        sleep(DELAY)
+        s.refreshScreenshot()
+        if not s.verifyBitmap("header1.png", colorMatch=0.7):
+            raise AssertionError("Not on page 1")
+    } #Koska testikohteessa voi tietysti olla virheita, varmistamme vastaako testikohteen ja mallin tila toisiaan
+}
+
+tag "sivulla_2_k" {
+    guard() { return (nykyinen_sivu == 2 and nakyma == "kansio")} # Mallin mukaan kun nykyinen_sivu on 1, meidan pitaisi olla sivulla yksi myös testikohteessa
+    adapter() {
+        sleep(DELAY)
+        s.refreshScreenshot()
+        if not s.verifyBitmap("header2.png", colorMatch=0.7):
+            raise AssertionError("Not on page 2")
+    } #Koska testikohteessa voi tietysti olla virheita, varmistamme vastaako testikohteen ja mallin tila toisiaan
+}
+tag "sivulla_3_k" {
+    guard() { return (nykyinen_sivu == 3 and nakyma == "kansio")} # Mallin mukaan kun nykyinen_sivu on 1, meidan pitaisi olla sivulla yksi myös testikohteessa
+    adapter() {
+        sleep(DELAY)
+        s.refreshScreenshot()
+        if not s.verifyBitmap("header3.png", colorMatch=0.7):
+            raise AssertionError("Not on page 3")
+    } #Koska testikohteessa voi tietysti olla virheita, varmistamme vastaako testikohteen ja mallin tila toisiaan
+}
+tag "sivulla_4_k" {
+    guard() { return (nykyinen_sivu == 4 and nakyma == "kansio")} # Mallin mukaan kun nykyinen_sivu on 1, meidan pitaisi olla sivulla yksi myös testikohteessa
+    adapter() {
+        sleep(DELAY)
+        s.refreshScreenshot()
+        if not s.verifyBitmap("header4.png", colorMatch=0.7):
+            raise AssertionError("Not on page 4")
+    } #Koska testikohteessa voi tietysti olla virheita, varmistamme vastaako testikohteen ja mallin tila toisiaan
+}
+tag "sivulla_5_k" {
+    guard() { return (nykyinen_sivu == 5 and nakyma == "kansio")} # Mallin mukaan kun nykyinen_sivu on 1, meidan pitaisi olla sivulla yksi myös testikohteessa
+    adapter() {
+        sleep(DELAY)
+        s.refreshScreenshot()
+        if not s.verifyBitmap("header5.png", colorMatch=0.7):
+            raise AssertionError("Not on page 5")
+    } #Koska testikohteessa voi tietysti olla virheita, varmistamme vastaako testikohteen ja mallin tila toisiaan
+}
+tag "sivulla_6_k" {
+    guard() { return (nykyinen_sivu == 6 and nakyma == "kansio")} # Mallin mukaan kun nykyinen_sivu on 1, meidan pitaisi olla sivulla yksi myös testikohteessa
+    adapter() {
+        sleep(DELAY)
+        s.refreshScreenshot()
+        if not s.verifyBitmap("header6.png", colorMatch=0.7):
+            raise AssertionError("Not on page 6")
+    } #Koska testikohteessa voi tietysti olla virheita, varmistamme vastaako testikohteen ja mallin tila toisiaan
+}
