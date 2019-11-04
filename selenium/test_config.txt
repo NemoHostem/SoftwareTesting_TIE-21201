@@ -3,3 +3,4 @@ WEB_URL = 'http://localhost:8080/ps/v1/index.html'
 USERNAME = 'user'
 PASSWORD = 'password'
 W = 1
+run_names = ['test_run1.txt']

@@ -18,32 +18,58 @@ from my_io import my_o
 
 
 SeleniumExceptions = (NoSuchElementException, ElementNotInteractableException, ElementClickInterceptedException)
-r = RunState()
 
 
-def viewListGuard():
+def view_list_guard():
     try:
         not_hidden = browser.find_element_by_id('view-list').get_attribute('class')
     except SeleniumException:
         logging.error(e)
     try:
-        assert not_hidden == 'hidden', line_info+'\nNot in list view'
+        assert not_hidden != 'hidden', line_info+'\nNot in list view'
     except AssertionError as e:
         logging.error(e)
     
 
-def viewFullGuard():
+def view_full_guard():
     try:
         not_hidden = browser.find_element_by_id('view-full').get_attribute('class')
     except SeleniumException:
         logging.error(e)
     try:
-        assert not_hidden == 'hidden', line_info+'\nNot in full view'
+        assert not_hidden != 'hidden', line_info+'\nNot in full view'
     except AssertionError as e:
         logging.error(e)
 
 
-def clickElementById(el):
+def create_tags_post(tags):
+    try:
+        text = browser.find_element_by_id('view-full-keywords').get_attribute('value')
+    except SeleniumException:
+        logging.error(e)
+    try:
+        a = False
+        for tag in tags:
+            if not tag in text:
+                print('Tag '+tag+' was not created')
+                a = True
+        assert not a, line_info+'\nSome tags were not created'
+    except AssertionError as e:
+        logging.error(e)
+
+
+def clear_tags_post():
+    try:
+        text = browser.find_element_by_id('view-full-keywords').get_attribute('value')
+    except SeleniumException:
+        logging.error(e)
+    try:
+        assert len(text) == 0, line_info+'\nTags were not removed (tags: '+text+')'
+    except AssertionError as e:
+        logging.error(e)
+
+
+def click_element_by_id(el):
     try:
         elem = browser.find_element_by_id(el)
         elem.click()
@@ -51,13 +77,15 @@ def clickElementById(el):
         logging.error(e)
         
         
-def fillTags(id_,tags):
+def fill_tags(id_,tags):
     try:
         elem = browser.find_element_by_id(id_)
         if len(tags) > 0:
             for tag in tags:
                 elem.send_keys(tag+',')
             elem.send_keys(Keys.BACKSPACE)
+        else:
+            elem.clear()
     except SeleniumExceptions as e:
         logging.error(e)
 
@@ -77,76 +105,89 @@ def login():
     sleep(W)
     
 
-def previousPhotos():
-    viewListGuard()
-    clickElementById('view-previous')
+def previous_photos():
+    view_list_guard()
+    click_element_by_id('view-previous')
     sleep(W)
     
     
-def nextPhotos():
-    viewListGuard()
-    clickElementById('view-next')
+def next_photos():
+    view_list_guard()
+    click_element_by_id('view-next')
     sleep(W)
     
     
-def previousPhoto():
-    viewFullGuard()
-    clickElementById('view-full-previous')
+def previous_photo():
+    view_full_guard()
+    click_element_by_id('view-full-previous')
     sleep(W)
     
     
-def nextPhoto():
-    viewFullGuard()
-    clickElementById('view-full-next')
+def next_photo():
+    view_full_guard()
+    click_element_by_id('view-full-next')
     sleep(W)
 
 
-def openPhoto(i): 
-    viewListGuard()
-    clickElementById(i)
+def open_photo(i): 
+    view_list_guard()
+    click_element_by_id(i)
     sleep(W)
    
     
-def closePhoto():
-    viewFullGuard()
-    clickElementById('view-full-close')
+def close_photo():
+    view_full_guard()
+    click_element_by_id('view-full-close')
     sleep(W)
         
 
-def clearTags():
-    viewFullGuard()
+def clear_tags():
+    view_full_guard()
     try:
         elem = browser.find_element_by_id('view-full-keywords')
         elem.clear()
-        clickElementById('view-full-save-keywords')
+        click_element_by_id('view-full-save-keywords')
     except SeleniumExceptions as e:
         logging.error(e)
     sleep(W)
+    clear_tags_post()
 
 
-def insertTags(tags):
-    viewFullGuard()
+def insert_tags(tags):
+    view_full_guard()
     try:
-        fillTags('view-full-keywords',tags)
+        fill_tags('view-full-keywords',tags)
         sleep(W)
-        clickElementById('view-full-save-keywords')
+        click_element_by_id('view-full-save-keywords')
+    except SeleniumExceptions as e:
+        logging.error(e)
+    sleep(W)
+    create_tags_post(tags)
+    
+    
+def replace_tags(tags):
+    view_full_guard()
+    clear_tags()
+    insert_tags(tags)
+    
+    
+def search_tags(tags):
+    view_list_guard()
+    try:
+        fill_tags('view-searchbar-keywords',tags)
+        sleep(W)
+        click_element_by_id('view-search')
     except SeleniumExceptions as e:
         logging.error(e)
     sleep(W)
     
     
-def replaceTags(tags):
-    viewFullGuard()
-    clearTags()
-    insertTags(tags)
-    
-    
-def searchTags(tags):
-    viewListGuard()
+def clear_search():
+    view_list_guard()
     try:
-        fillTags('view-searchbar-keywords',tags)
+        fill_tags('view-searchbar-keywords',[])
         sleep(W)
-        clickElementById('view-search')
+        click_element_by_id('view-search')
     except SeleniumExceptions as e:
         logging.error(e)
     sleep(W)
@@ -161,18 +202,17 @@ for line in test_config:
 
 
 browser = webdriver.Chrome(executable_path='/Users/'+ MY_USER_NAME+'/Downloads/chromedriver')
+
 browser.maximize_window()
 
 browser.get(WEB_URL)
 
-
-file_name = 'test_run.txt'
-test_run = my_o(file_name)
-
-
-for line_num,line in enumerate(test_run):
-    line_info = 'On line ' + str(line_num+1) + ' Command: ' + line
-    eval(line)
+for run_name in run_names:
+    test_run = my_o(run_name)
+    
+    for line_num,line in enumerate(test_run):
+        line_info = 'On line ' + str(line_num+1) + ' Command: ' + line
+        eval(line)
 
 
 
