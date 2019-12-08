@@ -1,5 +1,6 @@
 MY_USER_NAME = 'jonis'
-WEB_URL = 'http://localhost:8080/ps/v1/index.html'
+WEB_URL = 'http://localhost:8080/ps/v2/index.html'
 USERNAME = 'user'
 PASSWORD = 'password'
 W = 1
+run_names = ['test_run1.txt']
