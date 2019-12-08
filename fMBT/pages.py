@@ -18,7 +18,7 @@ class PagesTest(unittest.TestCase):
         s.refreshScreenshot()
 
     def tearDown(self):
-        s.tapBitmap("closeTab.png", colorMatch=0.9)
+        s.tapBitmap("seur.png", colorMatch=0.5)
         sleep(DELAY)
         s.refreshScreenshot()
 
@@ -27,7 +27,7 @@ class PagesTest(unittest.TestCase):
         s.tapBitmap("input-username.png", colorMatch=0.9)
         sleep(DELAY)
         s.refreshScreenshot()
-        found = s.verifyBitmap("header2.png", colorMatch=0.9)
+        found = s.verifyBitmap("kuvas6.png", colorMatch=0.9)
         self.assertTrue(found, "Header2 not found")
 
 if __name__ == '__main__':

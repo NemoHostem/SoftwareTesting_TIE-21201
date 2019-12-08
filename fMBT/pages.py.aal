@@ -3,7 +3,7 @@ language "python" {
 from time import sleep
 
 OPNRO = ":246248" # Muuta tama omaksesi
-POLKU = "http:/localhost:8080/ps/v1/index.html" #Muuta tama omaksesi
+POLKU = "http:/localhost:8080/ps/v2/index.html" #Muuta tama omaksesi
 DELAY = 3 #Viive sekunteina, tata saattaa joutua saatamaan
 USERNAME = "user"
 PASSWORD = "password"
@@ -69,31 +69,37 @@ input "kirjaudu" {
     }
 }
 input "siirry_seur_sivulle" {
-    guard() {return (nykyinen_sivu != 6 and nakyma == "kansio") or (nykyinen_kuva != 9 and nakyma == "kuva")}
+    guard() {return (nykyinen_sivu != 6 and nakyma == "kansio") or (nakyma == "kuva")}
     body() {
             if (nakyma == "kansio"):
                 nykyinen_sivu = nykyinen_sivu + 1
-            else:
+            elif (nakyma == "kuva" and nykyinen_kuva < 9):
                 nykyinen_kuva = nykyinen_kuva + 1
+            else:
+                nykyinen_kuva = 1
+                nykyinen_sivu = nykyinen_sivu + 1
            }
     adapter(){
         s.refreshScreenshot()
-        s.tapBitmap("seur.png", colorMatch=0.7)
+        s.tapBitmap("seur.png", colorMatch=0.5)
         sleep(DELAY)
 
     }
 }
 input "siirry_ed_sivulle" {
-    guard() {return (nykyinen_sivu != 1 and nakyma == "kansio") or (nykyinen_kuva != 1 and nakyma == "kuva")}
+    guard() {return (nykyinen_sivu != 1 and nakyma == "kansio") or (nakyma == "kuva")}
     body() {
             if (nakyma == "kansio"):
                 nykyinen_sivu = nykyinen_sivu - 1
-            else:
+            elif (nakyma == "kuva" and nykyinen_kuva > 1):
                 nykyinen_kuva = nykyinen_kuva - 1
+            else:
+                nykyinen_kuva = 9
+                nykyinen_sivu = nykyinen_sivu - 1
            }
     adapter(){
         s.refreshScreenshot()
-        s.tapBitmap("ed.png", colorMatch=0.7)
+        s.tapBitmap("ed.png", colorMatch=0.5)
         sleep(DELAY)
 
     }
@@ -112,7 +118,7 @@ input "siirry_kuvanakymaan_s1" {
     guard() {return (nykyinen_sivu == 1 and nakyma == "kansio")}
     body() {
             nakyma = "kuva"
-            nykyinen_kuva = 5
+            nykyinen_kuva = 3
            }
     adapter(){
         s.refreshScreenshot()
@@ -124,7 +130,7 @@ input "siirry_kuvanakymaan_s2" {
     guard() {return (nykyinen_sivu == 2 and nakyma == "kansio")}
     body() {
             nakyma = "kuva"
-            nykyinen_kuva = 4
+            nykyinen_kuva = 3
            }
     adapter(){
         s.refreshScreenshot()
@@ -148,7 +154,7 @@ input "siirry_kuvanakymaan_s4" {
     guard() {return (nykyinen_sivu == 4 and nakyma == "kansio")}
     body() {
             nakyma = "kuva"
-            nykyinen_kuva = 8
+            nykyinen_kuva = 3
            }
     adapter(){
         s.refreshScreenshot()
@@ -160,7 +166,7 @@ input "siirry_kuvanakymaan_s5" {
     guard() {return (nykyinen_sivu == 5 and nakyma == "kansio")}
     body() {
             nakyma = "kuva"
-            nykyinen_kuva = 6
+            nykyinen_kuva = 3
            }
     adapter(){
         s.refreshScreenshot()
@@ -172,7 +178,7 @@ input "siirry_kuvanakymaan_s6" {
     guard() {return (nykyinen_sivu == 6 and nakyma == "kansio")}
     body() {
             nakyma = "kuva"
-            nykyinen_kuva = 4
+            nykyinen_kuva = 3
            }
     adapter(){
         s.refreshScreenshot()
