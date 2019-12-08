@@ -23,7 +23,7 @@ SeleniumExceptions = (NoSuchElementException, ElementNotInteractableException, E
 def view_list_guard():
     try:
         not_hidden = browser.find_element_by_id('view-list').get_attribute('class')
-    except SeleniumException:
+    except SeleniumExceptions as e:
         logging.error(e)
     try:
         assert not_hidden != 'hidden', line_info+'\nNot in list view'
@@ -34,18 +34,27 @@ def view_list_guard():
 def view_full_guard():
     try:
         not_hidden = browser.find_element_by_id('view-full').get_attribute('class')
-    except SeleniumException:
+    except SeleniumExceptions as e:
         logging.error(e)
     try:
         assert not_hidden != 'hidden', line_info+'\nNot in full view'
     except AssertionError as e:
         logging.error(e)
 
+def assert_empty():
+    try:
+        browser.find_element_by_id('0')
+        assert False, line_info+'\nFound content where there should have been none!'
+    except SeleniumExceptions:
+        pass
+        # Here the exception is desired as no element should be found
+    except AssertionError as e:
+        logging.error(e)
 
 def create_tags_post(tags):
     try:
         text = browser.find_element_by_id('view-full-keywords').get_attribute('value')
-    except SeleniumException:
+    except SeleniumExceptions as e:
         logging.error(e)
     try:
         a = False
@@ -61,7 +70,7 @@ def create_tags_post(tags):
 def clear_tags_post():
     try:
         text = browser.find_element_by_id('view-full-keywords').get_attribute('value')
-    except SeleniumException:
+    except SeleniumExceptions as e:
         logging.error(e)
     try:
         assert len(text) == 0, line_info+'\nTags were not removed (tags: '+text+')'
@@ -80,6 +89,8 @@ def click_element_by_id(el):
 def fill_tags(id_,tags):
     try:
         elem = browser.find_element_by_id(id_)
+        if len(elem.get_attribute('value')) > 0:
+            elem.send_keys(',')
         if len(tags) > 0:
             for tag in tags:
                 elem.send_keys(tag+',')
